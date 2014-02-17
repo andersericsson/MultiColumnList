@@ -1,0 +1,8 @@
+<com.jayway.columnlist.ColumnListView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:list="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/list"
+    list:columns="2"
+    list:column_padding="8dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"/>

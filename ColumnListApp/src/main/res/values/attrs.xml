@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ColumnListView">
+        <attr name="columns" format="integer"/>
+        <attr name="column_padding" format="dimension"/>
+        <attr name="overscroll" format="boolean"/>
+        <attr name="fling_damping" format="float"/>
+        <attr name="snap_spring" format="integer"/>
+        <attr name="rubberband_factor" format="float"/>
+    </declare-styleable>
+</resources>

@@ -25,7 +25,7 @@ public class ColumnListView extends AdapterView<ListAdapter> {
 
     // Touch states
     private enum TouchState {
-        RESTING, PRESSED, SCROLLING
+        RESTING, PRESSED, SCROLLING, LONG_PRESS
     }
 
     // Holder class for the data of items of the list
@@ -481,6 +481,10 @@ public class ColumnListView extends AdapterView<ListAdapter> {
         // post a runnable that will set the touched view to pressed
         // it's done after a while since this might still be a scroll
         postDelayed(mSetPressedRunnable, ViewConfiguration.getScrollDefaultDelay());
+
+        // post a runnable that will set call the onItemLongClickListener for the
+        // touched item and put us in LONGPRESS mode
+        postDelayed(mLongPressRunnable, ViewConfiguration.getLongPressTimeout());
         return true;
     }
 
@@ -491,6 +495,21 @@ public class ColumnListView extends AdapterView<ListAdapter> {
             if (mTouchedItem != null && mTouchedItem.mView != null) {
                 mTouchedItem.mView.setPressed(true);
             }
+        }
+    };
+
+    private Runnable mLongPressRunnable = new Runnable() {
+        @Override
+        public void run() {
+            OnItemLongClickListener onItemLongClickListener = getOnItemLongClickListener();
+            if (onItemLongClickListener != null) {
+                boolean longPressConsumed = onItemLongClickListener.onItemLongClick(ColumnListView.this,
+                        mTouchedItem.mView, mTouchedItem.mPosition, mTouchedItem.mId);
+                if (longPressConsumed) {
+                    mTouchState = TouchState.LONG_PRESS;
+                }
+            }
+
         }
     };
 
@@ -529,6 +548,7 @@ public class ColumnListView extends AdapterView<ListAdapter> {
 
     private void startScrolling(MotionEvent event) {
         removeCallbacks(mSetPressedRunnable);
+        removeCallbacks(mLongPressRunnable);
         if (mTouchedItem != null && mTouchedItem.mView != null) {
             mTouchedItem.mView.setPressed(false);
         }
@@ -677,8 +697,13 @@ public class ColumnListView extends AdapterView<ListAdapter> {
     }
 
     private boolean endTouch() {
+        removeCallbacks(mLongPressRunnable);
+        removeCallbacks(mSetPressedRunnable);
         mVelocityTracker.computeCurrentVelocity(1000);
         float velocity = mVelocityTracker.getYVelocity();
+        if (mTouchState == TouchState.LONG_PRESS) {
+            velocity = 0;
+        }
         new FlingRunnable(velocity).start();
 
         mVelocityTracker.recycle();
